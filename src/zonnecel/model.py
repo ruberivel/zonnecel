@@ -26,6 +26,7 @@ class DiodeExperiment:
         self.voltages = []
         self.currents = []
         self.v_resistances = []
+        self.mosfet = []
 
     def identification(self):
         """Identificate the device.
@@ -177,13 +178,18 @@ class DiodeExperiment:
             bits_2 = self.device.get_input_value(2)
             voltage_0 = bits_0 * (3.3 / 1023)
             voltage_1 = bits_1 * (3.3 / 1023) * 3
-            voltage_2 = bits_2 * (3.3 / 1023)
+            voltage_2 = bits_2 * (3.3 / 1023) + 0.000001
 
             current = voltage_2 / 4.7
             # v_resistance = int(voltage_0) / int(current)
-            self.voltages.append(voltage_1)
-            self.currents.append(current)
             # self.v_resistances.append(v_resistance)
-        return self.voltages, self.currents, self.v_resistances
+            mosfet_R = (voltage_1 / current) - 1004.7
+            self.mosfet.append(mosfet_R)
+            if mosfet_R > 100000:
+                self.voltages.append(voltage_1)
+                self.currents.append(current)
+        return self.voltages, self.currents, self.v_resistances, self.mosfet
+
+
 
 

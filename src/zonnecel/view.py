@@ -29,14 +29,20 @@ class UserInterface(QtWidgets.QMainWindow):
 
         self.experiment = DiodeExperiment('ASRL9::INSTR')
 
-        self.voltages, self.currents, self.v_resistances = self.experiment.variable_resistances(0,1023)
+        self.voltages, self.currents, self.v_resistances, self.mosfet_R = self.experiment.variable_resistances(0,1023)
 
+        # self.plot_mosfet_R()
         self.plot()
 
     @Slot()
 
+    def plot_mosfet_R(self):
+        self.plot_widget.clear()
+        self.plot_widget.plot(self.voltages, self.mosfet_R, pen=None, symbol = 'o', symbolSize = 3)
+
     def plot(self):
         # create the plot
+        self.plot_widget.clear()
         self.plot_widget.plot(self.voltages, self.currents, pen=None, symbol = 'o', symbolSize = 3)
         self.plot_widget.setLabel("left", "Current I (A)")
         self.plot_widget.setLabel("bottom", "Voltage U (V)")

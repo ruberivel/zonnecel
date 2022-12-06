@@ -7,6 +7,10 @@ from model import DiodeExperiment
 from controller import list_devices
 import threading
 
+# PyQtGraph global options
+pg.setConfigOption("background", "w")
+pg.setConfigOption("foreground", "k")
+
 class UserInterface(QtWidgets.QMainWindow):
 
     def __init__(self):
@@ -16,12 +20,27 @@ class UserInterface(QtWidgets.QMainWindow):
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
 
-@Slot()
+        # make the vertical layout
+        self.vbox = QtWidgets.QVBoxLayout(central_widget)
 
-def plot():
-    pass
+        # make the plot widget and add to vertical layout
+        self.plot_widget = pg.PlotWidget()
+        self.vbox.addWidget(self.plot_widget)
 
+        self.experiment = DiodeExperiment('ASRL9::INSTR')
 
+        self.voltages, self.currents, self.v_resistances = self.experiment.variable_resistances(0,1023)
+
+        self.plot()
+
+    @Slot()
+
+    def plot(self):
+        # create the plot
+        self.plot_widget.plot(self.voltages, self.currents, pen=None, symbol = 'o', symbolSize = 3)
+        self.plot_widget.setLabel("left", "Current I (A)")
+        self.plot_widget.setLabel("bottom", "Voltage U (V)")
+        self.plot_widget.setTitle("U-I curve of the Zonnecel")
 
 def main():
     """This is the main part of the code. We make an instance of the QApplication and of our own class Userinterface and we call the show() method,
@@ -37,13 +56,9 @@ def main():
 if __name__ == "__main__":
     UserInterface
     main()
+    
 
 
-
-
-# # PyQtGraph global options
-# pg.setConfigOption("background", "w")
-# pg.setConfigOption("foreground", "k")
 
 # class UserInterface(QtWidgets.QMainWindow):
 #     """With this class we can create the Graphical User Interface (GUI).

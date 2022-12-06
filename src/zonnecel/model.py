@@ -23,6 +23,10 @@ class DiodeExperiment:
         self.x_err = []
         self.y_err = []
 
+        self.voltages = []
+        self.currents = []
+        self.v_resistances = []
+
     def identification(self):
         """Identificate the device.
 
@@ -164,3 +168,21 @@ class DiodeExperiment:
         """Close the device port.
         """        
         self.device.close_port()
+
+    def variable_resistances(self, start, stop):
+        for i in range(start,stop):
+            self.device.set_output_value(i)
+            voltage = self.device.get_input_value(0)
+            current = self.device.get_input_value(2)
+            if current != 0:
+                v_resistance = voltage / current
+            else:
+                v_resistance = 10000
+            voltage = int(voltage) * (3.3 / 1023) * 3
+            current = int(current) * (3.3 / 1023)
+            self.voltages.append(voltage)
+            self.currents.append(current)
+            self.v_resistances.append(v_resistance)
+        return self.voltages, self.currents, self.v_resistances
+
+

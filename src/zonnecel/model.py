@@ -172,17 +172,18 @@ class DiodeExperiment:
     def variable_resistances(self, start, stop):
         for i in range(start,stop):
             self.device.set_output_value(i)
-            voltage = self.device.get_input_value(0)
-            current = self.device.get_input_value(2)
-            if current != 0:
-                v_resistance = voltage / current
-            else:
-                v_resistance = 10000
-            voltage = int(voltage) * (3.3 / 1023) * 3
-            current = int(current) * (3.3 / 1023)
-            self.voltages.append(voltage)
+            bits_0 = self.device.get_input_value(0)
+            bits_1 = self.device.get_input_value(1)
+            bits_2 = self.device.get_input_value(2)
+            voltage_0 = bits_0 * (3.3 / 1023)
+            voltage_1 = bits_1 * (3.3 / 1023) * 3
+            voltage_2 = bits_2 * (3.3 / 1023)
+
+            current = voltage_2 / 4.7
+            # v_resistance = int(voltage_0) / int(current)
+            self.voltages.append(voltage_1)
             self.currents.append(current)
-            self.v_resistances.append(v_resistance)
+            # self.v_resistances.append(v_resistance)
         return self.voltages, self.currents, self.v_resistances
 
 

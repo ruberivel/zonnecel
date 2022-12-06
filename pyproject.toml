@@ -27,7 +27,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-scan = "zonnecel.view:main"
+scan = "zonnecel.src.zonnecel.view:main"
 
 # [tool.poe.tasks.compile]
 # shell = "pyside6-uic src/pythondaq/mainwindow.ui -o src/pythondaq/ui_mainwindow.py"

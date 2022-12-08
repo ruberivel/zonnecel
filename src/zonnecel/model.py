@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import threading
 
-from controller import ArduinoVISADevice
+from zonnecel.controller import ArduinoVISADevice
 
 class DiodeExperiment:
     """This class models the controller for the Arduino. 
@@ -27,6 +27,7 @@ class DiodeExperiment:
         self.currents = []
         self.v_resistances = []
         self.mosfet = []
+        self.p = []
 
     def identification(self):
         """Identificate the device.

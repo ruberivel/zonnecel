@@ -3,8 +3,8 @@ from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import Slot
 import numpy as np
 import pyqtgraph as pg
-from model import DiodeExperiment
-from controller import list_devices
+from zonnecel.model import DiodeExperiment
+from zonnecel.controller import list_devices
 import threading
 import click
 
@@ -25,12 +25,13 @@ class UserInterface(QtWidgets.QMainWindow):
 
         # make the vertical layout
         self.vbox_1 = QtWidgets.QVBoxLayout(central_widget)
-        self.vbox_2 = QtWidgets.QVBoxLayout(central_widget)
-        self.vbox_1.addLayout(self.vbox_2)
 
+        self.hbox_0 = QtWidgets.QHBoxLayout()
+        self.vbox_1.addLayout(self.hbox_0)
 
         # make the plot widget and add to vertical layout
         self.plot_widget = pg.PlotWidget()
+        
         self.vbox_1.addWidget(self.plot_widget)
 
         # hbox
@@ -94,11 +95,11 @@ class UserInterface(QtWidgets.QMainWindow):
 
         # select type graph
         self.PR_button = QtWidgets.QPushButton("PR graph")
-        self.vbox_2.addWidget(self.PR_button)
+        self.hbox_0.addWidget(self.PR_button)
         self.PR_button.clicked.connect(self.PR_button_clicked)
         self.UI_button = QtWidgets.QPushButton("UI graph")
-        self.vbox_2.addWidget(self.UI_button)
-        self.PR_button.clicked.connect(self.start_scan)
+        self.hbox_0.addWidget(self.UI_button)
+        self.UI_button.clicked.connect(self.start_scan)
 
     def start_scan(self):
         """This function starts the scan and thread.

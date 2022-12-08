@@ -50,7 +50,7 @@ class ArduinoVISADevice:
         bits = self.device.query("OUT:CH0?")
         return int(bits)
 
-    def get_input_value(self, channel):
+    def get_input_value(self, channel=0):
         """Measure the input value on a desired channel of the device.
 
         Args:

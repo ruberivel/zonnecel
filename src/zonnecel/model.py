@@ -172,7 +172,7 @@ class DiodeExperiment:
     def variable_resistances(self, start, stop):
         for i in range(start,stop):
             self.device.set_output_value(i)
-            bits_0 = self.device.get_input_value(0)
+            bits_0 = self.device.get_output_value()
             bits_1 = self.device.get_input_value(1)
             bits_2 = self.device.get_input_value(2)
             voltage_0 = bits_0 * (3.3 / 1023)
@@ -187,12 +187,13 @@ class DiodeExperiment:
             self.mosfet.append(voltage_1)
             self.voltages.append(voltage_0)
             self.currents.append(current)
+            self.p.append(voltage_1 * current)
 
             if mosfet_R > 20000000:
                 pass
                 
 
-        return self.voltages, self.currents, self.v_resistances, self.mosfet
+        return self.voltages, self.currents, self.v_resistances, self.mosfet, self.p
 
 
 

@@ -92,7 +92,7 @@ class UserInterface(QtWidgets.QMainWindow):
         for i in list:
             self.portselect.addItem(i)
 
-        self.portselect.setCurrentIndex(2)
+        self.portselect.setCurrentIndex(5)
 
         # select type graph
         self.PR_button = QtWidgets.QPushButton("Plot PR graph")

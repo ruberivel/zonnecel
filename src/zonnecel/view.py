@@ -81,7 +81,7 @@ class UserInterface(QtWidgets.QMainWindow):
 
         # scan button
         self.scan_button = QtWidgets.QPushButton("Perform the scans")
-        self.hbox_3.addWidget(self.scan_button)
+        # self.hbox_3.addWidget(self.scan_button)
         self.scan_button.clicked.connect(self.start_scan)
 
         #  make the combo box to select the port and add to the 2nd horizontal layout
@@ -95,10 +95,10 @@ class UserInterface(QtWidgets.QMainWindow):
         self.portselect.setCurrentIndex(2)
 
         # select type graph
-        self.PR_button = QtWidgets.QPushButton("PR graph")
+        self.PR_button = QtWidgets.QPushButton("Plot PR graph")
         self.hbox_0.addWidget(self.PR_button)
         self.PR_button.clicked.connect(self.PR_button_clicked)
-        self.UI_button = QtWidgets.QPushButton("UI graph")
+        self.UI_button = QtWidgets.QPushButton("Plot UI graph")
         self.hbox_0.addWidget(self.UI_button)
         self.UI_button.clicked.connect(self.start_scan)
 
@@ -106,10 +106,13 @@ class UserInterface(QtWidgets.QMainWindow):
         """This function starts the scan and thread.
         """       
         # check if there is a save button
+        self.PR_button.setEnabled(True)
+
         if self.is_save.is_set() == True:
             self.save_button.deleteLater()
 
         self.UI_button.setEnabled(False)
+        self.scan_button.setEnabled(False)
 
         # start the scan
         self.experiment = DiodeExperiment(self.portselect.currentText())
@@ -123,8 +126,6 @@ class UserInterface(QtWidgets.QMainWindow):
         self.is_save.set()
 
         self.plot()
-
-        self.UI_button.setEnabled(True)
         # close the port
         self.experiment.close_port()
 
@@ -132,10 +133,14 @@ class UserInterface(QtWidgets.QMainWindow):
         """This function starts the scan and thread.
         """       
         # check if there is a save button
+        
+        self.UI_button.setEnabled(True)
+
         if self.is_save.is_set() == True:
             self.save_button.deleteLater()
 
         self.PR_button.setEnabled(False)
+        self.scan_button.setEnabled(False)
 
         # start the scan
         self.experiment = DiodeExperiment(self.portselect.currentText())
@@ -151,7 +156,6 @@ class UserInterface(QtWidgets.QMainWindow):
         # self.plot_mosfet_R()
         self.plotPR()
 
-        self.PR_button.setEnabled(True)
         # close the port
         self.experiment.close_port()
 
@@ -176,9 +180,9 @@ class UserInterface(QtWidgets.QMainWindow):
         # create the plot
         self.plot_widget.clear()
         self.plot_widget.plot(self.P, self.v_resistances, pen=None, symbol = 'o', symbolSize = 3)
-        self.plot_widget.setLabel("left", "Current I (A)")
-        self.plot_widget.setLabel("bottom", "Voltage U (V)")
-        self.plot_widget.setTitle("U-I curve of the Zonnecel")
+        self.plot_widget.setLabel("left", "Resistance (Ohm)")
+        self.plot_widget.setLabel("bottom", "Power (P)")
+        self.plot_widget.setTitle("P-R curve of the Zonnecel")
 
     def save_data(self):    
         """This function gives the user a button to save the data of the scans.

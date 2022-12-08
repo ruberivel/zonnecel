@@ -111,29 +111,30 @@ class UserInterface(QtWidgets.QMainWindow):
         # start the scan
         self.experiment = DiodeExperiment(self.portselect.currentText())
 
-        self.voltages, self.currents, self.v_resistances, self.mosfet_R = self.experiment.variable_resistances(0,1023)
+        self.voltages, self.currents, self.v_resistances, self.mosfet_R, self.P = self.experiment.variable_resistances(0,1023)
 
         # save button
         self.save_button = QtWidgets.QPushButton("Save the data as...")
         self.save_button.clicked.connect(self.save_data)
         self.hbox_4.addWidget(self.save_button)
 
-        # self.plot_mosfet_R()
         self.plot()
 
         self.UI_button.setEnabled(True)
+        # close the port
+        self.experiment.close_port()
 
     def PR_button_clicked(self):
         """This function starts the scan and thread.
         """       
         # check if there is a scan
 
-        self.UI_button.setEnabled(False)
+        self.PR_button.setEnabled(False)
 
         # start the scan
         self.experiment = DiodeExperiment(self.portselect.currentText())
 
-        self.voltages, self.currents, self.v_resistances, self.mosfet_R = self.experiment.variable_resistances(0,1023)
+        self.voltages, self.currents, self.v_resistances, self.mosfet_R, self.P = self.experiment.variable_resistances(0,1023)
 
         # save button
         self.save_button = QtWidgets.QPushButton("Save the data as...")
@@ -141,9 +142,11 @@ class UserInterface(QtWidgets.QMainWindow):
         self.hbox_4.addWidget(self.save_button)
 
         # self.plot_mosfet_R()
-        self.plot()
+        self.plotPR()
 
-        self.UI_button.setEnabled(True)
+        self.PR_button.setEnabled(True)
+        # close the port
+        self.experiment.close_port()
 
 
     @Slot()
@@ -162,15 +165,22 @@ class UserInterface(QtWidgets.QMainWindow):
         self.plot_widget.setLabel("bottom", "Voltage U (V)")
         self.plot_widget.setTitle("U-I curve of the Zonnecel")
 
+    def plotPR(self):
+        # create the plot
+        self.plot_widget.clear()
+        self.plot_widget.plot(self.P, self.v_resistances, pen=None, symbol = 'o', symbolSize = 3)
+        self.plot_widget.setLabel("left", "Current I (A)")
+        self.plot_widget.setLabel("bottom", "Voltage U (V)")
+        self.plot_widget.setTitle("U-I curve of the Zonnecel")
+
     def save_data(self):    
         """This function gives the user a button to save the data of the scans.
         After clicking, the file explorer of the user will open and they can select a location to save. The .csv will be added automatically.
         """        
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(filter="CSV files (*.csv)")
         self.experiment.write_csv(filename)
+        self.save_button.deleteLater()
 
-    
-    
 
 def main():
     """This is the main part of the code. We make an instance of the QApplication and of our own class Userinterface and we call the show() method,

@@ -185,9 +185,11 @@ class DiodeExperiment:
             # self.v_resistances.append(v_resistance)
             mosfet_R = (voltage_1 / current) - 1004.7
             self.mosfet.append(mosfet_R)
+            self.voltages.append(voltage_1)
             if mosfet_R > 100000:
-                self.voltages.append(voltage_1)
+
                 self.currents.append(current)
+
         return self.voltages, self.currents, self.v_resistances, self.mosfet
 
 

@@ -42,8 +42,8 @@ class UserInterface(QtWidgets.QMainWindow):
 
         self.voltages, self.currents, self.v_resistances, self.mosfet_R = self.experiment.variable_resistances(0,1023)
 
-        self.plot_mosfet_R()
-        # self.plot()
+        # self.plot_mosfet_R()
+        self.plot()
 
     @Slot()
 

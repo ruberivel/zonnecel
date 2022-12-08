@@ -18,6 +18,7 @@ class UserInterface(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.is_scanning = threading.Event()
+        self.is_save = threading.Event()
 
         # create the central widget, every QMainWindow should have a central widget
         central_widget = QtWidgets.QWidget()
@@ -104,7 +105,9 @@ class UserInterface(QtWidgets.QMainWindow):
     def start_scan(self):
         """This function starts the scan and thread.
         """       
-        # check if there is a scan
+        # check if there is a save button
+        if self.is_save.is_set() == True:
+            self.save_button.deleteLater()
 
         self.UI_button.setEnabled(False)
 
@@ -117,6 +120,7 @@ class UserInterface(QtWidgets.QMainWindow):
         self.save_button = QtWidgets.QPushButton("Save the data as...")
         self.save_button.clicked.connect(self.save_data)
         self.hbox_4.addWidget(self.save_button)
+        self.is_save.set()
 
         self.plot()
 

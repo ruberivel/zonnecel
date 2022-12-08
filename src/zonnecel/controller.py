@@ -1,4 +1,10 @@
-import pyvisa
+try:
+
+ from nsp2visasim import sim_pyvisa as pyvisa
+
+except ModuleNotFoundError:
+
+ import pyvisa
 
 def list_devices():
     """List the devices currently detected.

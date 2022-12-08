@@ -131,7 +131,9 @@ class UserInterface(QtWidgets.QMainWindow):
     def PR_button_clicked(self):
         """This function starts the scan and thread.
         """       
-        # check if there is a scan
+        # check if there is a save button
+        if self.is_save.is_set() == True:
+            self.save_button.deleteLater()
 
         self.PR_button.setEnabled(False)
 
@@ -144,6 +146,7 @@ class UserInterface(QtWidgets.QMainWindow):
         self.save_button = QtWidgets.QPushButton("Save the data as...")
         self.save_button.clicked.connect(self.save_data)
         self.hbox_4.addWidget(self.save_button)
+        self.is_save.set()
 
         # self.plot_mosfet_R()
         self.plotPR()

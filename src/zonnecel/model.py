@@ -149,12 +149,10 @@ class DiodeExperiment:
     def write_csv(self, filename):
         """Write a csv file with the measured voltages and currents and uncertainties.
         """        
-        voltages = self.avg_U_list
-        currents = self.avg_I_list
-        uncert_U = self.stds_U
-        uncert_I = self.stds_I
+        voltages = self.voltages
+        currents = self.currents
 
-        fields = ['voltages', ' currents', ' uncertainties of U', ' uncertainties of I']
+        fields = ['voltages (V)', ' currents (A)']
   
         with open(filename, 'w') as f:
             write = csv.writer(f)            
@@ -162,7 +160,7 @@ class DiodeExperiment:
 
             # make sure the csv file will have four columns for each group
             for i in range (0, len(voltages)):
-                row = [np.round(voltages[i], 2), currents[i], uncert_U[i], uncert_I[i]] 
+                row = [np.round(voltages[i], 2), currents[i]] 
                 write.writerow(row)
 
     def close_port(self):
@@ -184,11 +182,14 @@ class DiodeExperiment:
             # v_resistance = int(voltage_0) / int(current)
             # self.v_resistances.append(v_resistance)
             mosfet_R = (voltage_1 / current) - 1004.7
-            self.mosfet.append(mosfet_R)
-            self.voltages.append(voltage_1)
-            if mosfet_R > 100000:
 
-                self.currents.append(current)
+            self.mosfet.append(voltage_1)
+            self.voltages.append(voltage_0)
+            self.currents.append(current)
+
+            if mosfet_R > 20000000:
+                pass
+                
 
         return self.voltages, self.currents, self.v_resistances, self.mosfet
 

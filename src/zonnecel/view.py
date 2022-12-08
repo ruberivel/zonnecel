@@ -27,12 +27,23 @@ class UserInterface(QtWidgets.QMainWindow):
         self.plot_widget = pg.PlotWidget()
         self.vbox.addWidget(self.plot_widget)
 
-        self.experiment = DiodeExperiment('ASRL9::INSTR')
+        # hbox
+        hbox_1 = QtWidgets.QHBoxLayout()
+        self.vbox.addLayout(hbox_1)
+        hbox_2 = QtWidgets.QHBoxLayout()
+        self.vbox.addLayout(hbox_2)
+
+        # save button
+        self.save_button = QtWidgets.QPushButton("Save the data as...")
+        self.save_button.clicked.connect(self.save_data)
+        hbox_1.addWidget(self.save_button)
+
+        self.experiment = DiodeExperiment('ASRL8::INSTR')
 
         self.voltages, self.currents, self.v_resistances, self.mosfet_R = self.experiment.variable_resistances(0,1023)
 
-        # self.plot_mosfet_R()
-        self.plot()
+        self.plot_mosfet_R()
+        # self.plot()
 
     @Slot()
 
@@ -47,6 +58,15 @@ class UserInterface(QtWidgets.QMainWindow):
         self.plot_widget.setLabel("left", "Current I (A)")
         self.plot_widget.setLabel("bottom", "Voltage U (V)")
         self.plot_widget.setTitle("U-I curve of the Zonnecel")
+
+    def save_data(self):    
+        """This function gives the user a button to save the data of the scans.
+        After clicking, the file explorer of the user will open and they can select a location to save. The .csv will be added automatically.
+        """        
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(filter="CSV files (*.csv)")
+        # self.experiment.write_csv(filename)
+    
+    
 
 def main():
     """This is the main part of the code. We make an instance of the QApplication and of our own class Userinterface and we call the show() method,

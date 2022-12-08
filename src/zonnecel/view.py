@@ -6,6 +6,8 @@ import pyqtgraph as pg
 from model import DiodeExperiment
 from controller import list_devices
 import threading
+import click
+
 
 # PyQtGraph global options
 pg.setConfigOption("background", "w")
@@ -15,41 +17,141 @@ class UserInterface(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.is_scanning = threading.Event()
 
         # create the central widget, every QMainWindow should have a central widget
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
 
         # make the vertical layout
-        self.vbox = QtWidgets.QVBoxLayout(central_widget)
+        self.vbox_1 = QtWidgets.QVBoxLayout(central_widget)
+        self.vbox_2 = QtWidgets.QVBoxLayout(central_widget)
+        self.vbox_1.addLayout(self.vbox_2)
+
 
         # make the plot widget and add to vertical layout
         self.plot_widget = pg.PlotWidget()
-        self.vbox.addWidget(self.plot_widget)
+        self.vbox_1.addWidget(self.plot_widget)
 
         # hbox
-        hbox_1 = QtWidgets.QHBoxLayout()
-        self.vbox.addLayout(hbox_1)
-        hbox_2 = QtWidgets.QHBoxLayout()
-        self.vbox.addLayout(hbox_2)
+        self.hbox_1 = QtWidgets.QHBoxLayout()
+        self.vbox_1.addLayout(self.hbox_1)
+        self.hbox_2 = QtWidgets.QHBoxLayout()
+        self.vbox_1.addLayout(self.hbox_2)
+        self.hbox_3 = QtWidgets.QHBoxLayout()
+        self.vbox_1.addLayout(self.hbox_3)
+        self.hbox_4 = QtWidgets.QHBoxLayout()
+        self.vbox_1.addLayout(self.hbox_4)
+
+        # make start, stop, number of scans buttons, with labels
+        self.start_button = QtWidgets.QDoubleSpinBox()
+        start = QtWidgets.QLabel()
+        start.setText("Start value (input voltage)")
+        self.stop_button = QtWidgets.QDoubleSpinBox()
+        stop = QtWidgets.QLabel()
+        stop.setText("Stop value (input voltage)")
+        self.numberofscans_button = QtWidgets.QSpinBox()
+        numberofscans = QtWidgets.QLabel()
+        numberofscans.setText("Number of scans")
+
+        # add the labels to the 1st horizontal layout
+        self.hbox_1.addWidget(start)
+        self.hbox_1.addWidget(stop)
+        self.hbox_1.addWidget(numberofscans)
+
+        # add the buttons to the 2nd horizontal layout
+        self.hbox_2.addWidget(self.start_button)
+        self.hbox_2.addWidget(self.stop_button)
+        self.hbox_2.addWidget(self.numberofscans_button)
+
+        # standard values for the parameters
+        self.start_button.setValue(0.00)
+        self.stop_button.setValue(3.30)
+        self.numberofscans_button.setValue(4)
+
+        # give boundaries
+        self.start_button.setMinimum(0.00)
+        self.start_button.setMaximum(3.29)
+        self.stop_button.setMinimum(0.01)
+        self.stop_button.setMaximum(3.30)
+        self.numberofscans_button.setMinimum(3)
+        self.numberofscans_button.setMaximum(20)
+
+        # scan button
+        self.scan_button = QtWidgets.QPushButton("Perform the scans")
+        self.hbox_3.addWidget(self.scan_button)
+        self.scan_button.clicked.connect(self.start_scan)
+
+        #  make the combo box to select the port and add to the 2nd horizontal layout
+        self.portselect = QtWidgets.QComboBox()
+        self.hbox_3.addWidget(self.portselect)
+        # add the available devices to the combo box
+        list = list_devices()
+        for i in list:
+            self.portselect.addItem(i)
+
+        self.portselect.setCurrentIndex(2)
+
+        # select type graph
+        self.PR_button = QtWidgets.QPushButton("PR graph")
+        self.vbox_2.addWidget(self.PR_button)
+        self.PR_button.clicked.connect(self.PR_button_clicked)
+        self.UI_button = QtWidgets.QPushButton("UI graph")
+        self.vbox_2.addWidget(self.UI_button)
+        self.PR_button.clicked.connect(self.start_scan)
+
+    def start_scan(self):
+        """This function starts the scan and thread.
+        """       
+        # check if there is a scan
+
+        self.UI_button.setEnabled(False)
+
+        # start the scan
+        self.experiment = DiodeExperiment(self.portselect.currentText())
+
+        self.voltages, self.currents, self.v_resistances, self.mosfet_R = self.experiment.variable_resistances(0,1023)
 
         # save button
         self.save_button = QtWidgets.QPushButton("Save the data as...")
         self.save_button.clicked.connect(self.save_data)
-        hbox_1.addWidget(self.save_button)
-
-        self.experiment = DiodeExperiment('ASRL8::INSTR')
-
-        self.voltages, self.currents, self.v_resistances, self.mosfet_R = self.experiment.variable_resistances(0,1023)
+        self.hbox_4.addWidget(self.save_button)
 
         # self.plot_mosfet_R()
         self.plot()
+
+        self.UI_button.setEnabled(True)
+
+    def PR_button_clicked(self):
+        """This function starts the scan and thread.
+        """       
+        # check if there is a scan
+
+        self.UI_button.setEnabled(False)
+
+        # start the scan
+        self.experiment = DiodeExperiment(self.portselect.currentText())
+
+        self.voltages, self.currents, self.v_resistances, self.mosfet_R = self.experiment.variable_resistances(0,1023)
+
+        # save button
+        self.save_button = QtWidgets.QPushButton("Save the data as...")
+        self.save_button.clicked.connect(self.save_data)
+        self.hbox_4.addWidget(self.save_button)
+
+        # self.plot_mosfet_R()
+        self.plot()
+
+        self.UI_button.setEnabled(True)
+
 
     @Slot()
 
     def plot_mosfet_R(self):
         self.plot_widget.clear()
         self.plot_widget.plot(self.voltages, self.mosfet_R, pen=None, symbol = 'o', symbolSize = 3)
+        self.plot_widget.setLabel("left", "Voltage U1 (V)")
+        self.plot_widget.setLabel("bottom", "Voltage U0 (V)")
 
     def plot(self):
         # create the plot
@@ -64,7 +166,8 @@ class UserInterface(QtWidgets.QMainWindow):
         After clicking, the file explorer of the user will open and they can select a location to save. The .csv will be added automatically.
         """        
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(filter="CSV files (*.csv)")
-        # self.experiment.write_csv(filename)
+        self.experiment.write_csv(filename)
+
     
     
 
@@ -111,19 +214,19 @@ if __name__ == "__main__":
 #         self.setCentralWidget(central_widget)
 
 #         # make the vertical layout
-#         self.vbox = QtWidgets.QVBoxLayout(central_widget)
+#         self.vbox_1 = QtWidgets.Qvbox_1Layout(central_widget)
 
 #         # make the plot widget and add to vertical layout
 #         self.plot_widget = pg.PlotWidget()
-#         self.vbox.addWidget(self.plot_widget)
+#         self.vbox_1.addWidget(self.plot_widget)
 
 #         # make horizontal layouts and add to vertical if needed
-#         hbox_1 = QtWidgets.QHBoxLayout()
-#         self.vbox.addLayout(hbox_1)
-#         hbox_2 = QtWidgets.QHBoxLayout()
-#         self.vbox.addLayout(hbox_2)
+#         self.self.hbox_1 = QtWidgets.QHBoxLayout()
+#         self.vbox_1.addLayout(self.self.hbox_1)
+#         self.self.hbox_2 = QtWidgets.QHBoxLayout()
+#         self.vbox_1.addLayout(self.self.hbox_2)
 #         self.hbox_3 = QtWidgets.QHBoxLayout()
-#         self.vbox.addLayout(self.hbox_3)    
+#         self.vbox_1.addLayout(self.hbox_3)    
 #         self.hbox_4 = QtWidgets.QHBoxLayout()  
 
 #         # make start, stop, number of scans buttons, with labels
@@ -142,14 +245,14 @@ if __name__ == "__main__":
 #         self.save_button.clicked.connect(self.save_data)
 
 #         # add the labels to the 1st horizontal layout
-#         hbox_1.addWidget(start)
-#         hbox_1.addWidget(stop)
-#         hbox_1.addWidget(numberofscans)
+#         self.self.hbox_1.addWidget(start)
+#         self.self.hbox_1.addWidget(stop)
+#         self.self.hbox_1.addWidget(numberofscans)
 
 #         # add the buttons to the 2nd horizontal layout
-#         hbox_2.addWidget(self.start_button)
-#         hbox_2.addWidget(self.stop_button)
-#         hbox_2.addWidget(self.numberofscans_button)
+#         self.self.hbox_2.addWidget(self.start_button)
+#         self.self.hbox_2.addWidget(self.stop_button)
+#         self.self.hbox_2.addWidget(self.numberofscans_button)
 
 #         # make a scan button, add it to 3rd horizontal layout, and connect it to a function
 #         self.scan_button = QtWidgets.QPushButton("Perform the scans")
@@ -171,7 +274,7 @@ if __name__ == "__main__":
 
 #         #  make the combo box to select the port and add to the 2nd horizontal layout
 #         self.portselect = QtWidgets.QComboBox()
-#         hbox_2.addWidget(self.portselect)
+#         self.self.hbox_2.addWidget(self.portselect)
 
 #         # add the available devices to the combo box
 #         list = list_devices()
@@ -212,7 +315,7 @@ if __name__ == "__main__":
 
 #             # make the save button appear so the user can save the data
 #             self.hbox_4.addWidget(self.save_button)
-#             self.vbox.addLayout(self.hbox_4)
+#             self.vbox_1.addLayout(self.hbox_4)
 
 
 #     def plot(self):

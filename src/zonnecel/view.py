@@ -101,12 +101,16 @@ class UserInterface(QtWidgets.QMainWindow):
         self.UI_button = QtWidgets.QPushButton("Plot UI graph")
         self.hbox_0.addWidget(self.UI_button)
         self.UI_button.clicked.connect(self.start_scan)
+        self.PU_button = QtWidgets.QPushButton("Plot PU graph")
+        self.hbox_0.addWidget(self.PU_button)
+        self.PU_button.clicked.connect(self.PU_button_clicked)
 
     def start_scan(self):
         """This function starts the scan and thread.
         """       
         # check if there is a save button
         self.PR_button.setEnabled(True)
+        self.PU_button.setEnabled(True)
 
         if self.is_save.is_set() == True:
             self.save_button.deleteLater()
@@ -133,9 +137,8 @@ class UserInterface(QtWidgets.QMainWindow):
         """This function starts the scan and thread.
         """       
         # check if there is a save button
-        
         self.UI_button.setEnabled(True)
-
+        self.PU_button.setEnabled(True)
         if self.is_save.is_set() == True:
             self.save_button.deleteLater()
 
@@ -159,6 +162,35 @@ class UserInterface(QtWidgets.QMainWindow):
         # close the port
         self.experiment.close_port()
 
+    def PU_button_clicked(self):
+        """This function starts the scan and thread.
+        """       
+        # check if there is a save button
+        self.UI_button.setEnabled(True)
+        self.PR_button.setEnabled(True)
+
+        if self.is_save.is_set() == True:
+            self.save_button.deleteLater()
+
+        self.PU_button.setEnabled(False)
+
+        # start the scan
+        self.experiment = DiodeExperiment(self.portselect.currentText())
+
+        self.voltages, self.currents, self.v_resistances, self.mosfet_R, self.P = self.experiment.variable_resistances(0,1023)
+
+        # save button
+        self.save_button = QtWidgets.QPushButton("Save the data as...")
+        self.save_button.clicked.connect(self.save_data)
+        self.hbox_4.addWidget(self.save_button)
+        self.is_save.set()
+
+        # self.plot_mosfet_R()
+        self.plotPU()
+
+        # close the port
+        self.experiment.close_port()
+
 
     @Slot()
 
@@ -174,15 +206,23 @@ class UserInterface(QtWidgets.QMainWindow):
         self.plot_widget.plot(self.voltages, self.currents, pen=None, symbol = 'o', symbolSize = 3)
         self.plot_widget.setLabel("left", "Current I (A)")
         self.plot_widget.setLabel("bottom", "Voltage U (V)")
-        self.plot_widget.setTitle("U-I curve of the Zonnecel")
+        self.plot_widget.setTitle("UI curve of the Zonnecel")
+
+    def plotPU(self):
+        # create the plot
+        self.plot_widget.clear()
+        self.plot_widget.plot(self.voltages, self.P, pen=None, symbol = 'o', symbolSize = 3)
+        self.plot_widget.setLabel("left", "Power (W)")
+        self.plot_widget.setLabel("bottom", "Voltage U (V)")
+        self.plot_widget.setTitle("PU curve of the Zonnecel")
 
     def plotPR(self):
         # create the plot
         self.plot_widget.clear()
-        self.plot_widget.plot(self.P, self.v_resistances, pen=None, symbol = 'o', symbolSize = 3)
+        self.plot_widget.plot(self.P, self.mosfet_R, pen=None, symbol = 'o', symbolSize = 3)
         self.plot_widget.setLabel("left", "Resistance (Ohm)")
-        self.plot_widget.setLabel("bottom", "Power (P)")
-        self.plot_widget.setTitle("P-R curve of the Zonnecel")
+        self.plot_widget.setLabel("bottom", "Power (W)")
+        self.plot_widget.setTitle("PR curve of the Zonnecel")
 
     def save_data(self):    
         """This function gives the user a button to save the data of the scans.
